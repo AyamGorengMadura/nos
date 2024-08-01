@@ -103,8 +103,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <a name="" id="" class="btn btn-primary" href="index.php" role="button">Kembali</a>
 
             <form action="" method="post">
-                <div class="">
-                    <label for="title" class="">Title:</label>
+                <div class="mt-3">
+                    <label for="title" class="">No Activity</label>
                     <br>
                     <input class="mt-2" type="text" id="title" name="title" required>
                 </div>
