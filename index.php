@@ -11,14 +11,18 @@ if (isset($_POST['create'])) {
     $judul = $_POST['judul'];
     $periode = $_POST['periode'];
     $tahun = $_POST['tahun'];
+    $coe = $_POST['COE'];
     $activityid = $_POST['activityid'];
 
-    $stmt = $dbconn->prepare("INSERT INTO activities (judul, periode, tahun, activityid) VALUES (?, ?, ?, ?)");
+    nl2br(htmlspecialchars($coe));
+
+    $stmt = $dbconn->prepare("INSERT INTO activities (judul, periode, tahun, coe, activityid) VALUES (?, ?, ?, ?, ?)");
     if ($stmt === false) {
         die('Prepare failed: ' . htmlspecialchars($dbconn->error));
     }
 
-    $stmt->bind_param("ssis", $judul, $periode, $tahun, $activityid);
+    // Corrected bind_param call
+    $stmt->bind_param("ssisi", $judul, $periode, $tahun, $coe, $activityid);
     if ($stmt->execute() === false) {
         die('Execute failed: ' . htmlspecialchars($stmt->error));
     }
@@ -29,7 +33,9 @@ if (isset($_POST['create'])) {
 // Read operation
 $results = $dbconn->query("SELECT * FROM activities");
 
+
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -138,6 +144,10 @@ $results = $dbconn->query("SELECT * FROM activities");
                     <div class="mb-3">
                         <label for="tahun" class="text-light form-label">Tahun</label>
                         <input type="number" class="form-control" id="tahun" name="tahun" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tahun" class="text-light form-label">COE</label>
+                        <textarea type="text" class="form-control" id="COE" name="COE" required></textarea>
                     </div>
                     <div class="mb-3">
                         <label for="activityid" class="text-light form-label">No Activity</label>
