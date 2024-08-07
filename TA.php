@@ -22,67 +22,63 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $periode = $row['periode'];
         $tahun = $row['tahun'];
 
-        // Ambil input
-        $latar_belakang = isset($_POST['latar_belakang']) ? $_POST['latar_belakang'] : [];
-        $business_technical_assessment = isset($_POST['business_technical_assessment']) ? $_POST['business_technical_assessment'] : [];
-        $ruang_lingkup_pekerjaan = isset($_POST['ruang_lingkup_pekerjaan']) ? $_POST['ruang_lingkup_pekerjaan'] : [];
-        $summary = isset($_POST['summary']) ? $_POST['summary'] : [];
-        $gambar_deskripsi = isset($_POST['gambar_deskripsi']) ? $_POST['gambar_deskripsi'] : [];
+        // Ambil input bab
+        $chapters = $_POST['chapter_name'];
+        $sections = [];
+
+        foreach ($chapters as $rabIndex => $chapterNames) {
+            foreach ($chapterNames as $chapterCount => $chapterName) {
+                $section = [
+                    'name' => htmlspecialchars($chapterName),
+                    'points' => isset($_POST['latar_belakang'][$rabIndex][$chapterCount]) ? $_POST['latar_belakang'][$rabIndex][$chapterCount] : [],
+                    'images' => isset($_FILES['business_technical_images']) ? $_FILES['business_technical_images'] : [],
+                    'image_descriptions' => isset($_POST['gambar_deskripsi']) ? $_POST['gambar_deskripsi'] : []
+                ];
+                $sections[] = $section;
+            }
+        }
 
         $mpdf = new Mpdf();
 
-        // cover start
+        // Cover start
         $mpdf->WriteHTML("<h1 style='text-align: center;'>TECHNICAL ASSESMENT</h1><br>");
         $mpdf->WriteHTML("<h2 style='text-align: center;'>$judul</h2>");
         $mpdf->WriteHTML("<h2 style='text-align: center;'>Periode: $periode, Tahun: $tahun</h2>");
 
         // Ubah $coe menjadi vertikal
-        $coe_array = explode(',', $coe); // misalnya $coe dipisahkan oleh koma
+        $coe_array = explode(',', $coe); // Misalnya $coe dipisahkan oleh koma
         $coe_vertical = implode('<br>', $coe_array);
         $mpdf->WriteHTML("<p style='text-align: center;'>$coe_vertical</p>");
-        // cover end
-
-        $mpdf->AddPage() ;
+        // Cover end
 
         // Tambahkan header
         $mpdf->SetHTMLHeader("<div style='text-align: center;'>
             <p>$judul, Periode: $periode, Tahun: $tahun<p>
         </div>");
 
-        // Loop melalui setiap RAB section
-        $sections = count($latar_belakang); // Asumsi semua input array memiliki panjang yang sama
-        for ($i = 0; $i < $sections; $i++) {
-            // Tambahkan halaman baru untuk setiap section RAB
-            if ($i > 0) {
-                $mpdf->AddPage();
-            }
+        // Loop melalui setiap section
+        foreach ($sections as $index => $section) {
+            $sectionName = htmlspecialchars($section['name']);
+            $mpdf->AddPage();
+            $mpdf->WriteHTML("<h3>$sectionName</h3>");
 
-            // Latar Belakang
-            $mpdf->WriteHTML("<h3>Latar Belakang</h3>
-                                <p> Latar belakang dilaksanakannya pekerjaan ini adalah sebagai berikut; </p>");
-            if (is_array($latar_belakang[$i])) {
-                foreach ($latar_belakang[$i] as $index => $poin) {
-                    $mpdf->WriteHTML("<p class='konten'>" . chr(97 + $index) . ". $poin</p>"); // chr(97) == 'a'
+            // Tambahkan poin
+            if (isset($section['points']) && is_array($section['points'])) {
+                foreach ($section['points'] as $pointIndex => $point) {
+                    $mpdf->WriteHTML("<p>" . chr(97 + $pointIndex) . ". $point</p>"); // chr(97) == 'a'
                 }
             }
 
-            // Business dan Technical Assessment
-            $mpdf->WriteHTML("<h3>Business dan Technical Assessment</h3>");
-            if (is_array($business_technical_assessment[$i])) {
-                foreach ($business_technical_assessment[$i] as $index => $poin) {
-                    $mpdf->WriteHTML("<p>" . chr(97 + $index) . ". $poin</p>");
-                }
-            }
-
-            // Upload gambar dengan deskripsi
-            if (isset($_FILES['business_technical_images']) && is_array($_FILES['business_technical_images']['tmp_name']) && count($_FILES['business_technical_images']['tmp_name']) > 0) {
+            // Loop through each image for this chapter
+            if (isset($_FILES['business_technical_images']) && is_array($_FILES['business_technical_images']['tmp_name'])) {
                 $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
-                foreach ($_FILES['business_technical_images']['tmp_name'] as $index => $tmpName) {
-                    if ($_FILES['business_technical_images']['error'][$index] === UPLOAD_ERR_OK) {
+                foreach ($_FILES['business_technical_images']['tmp_name'] as $imgIndex => $tmpName) {
+                    // Check for upload errors
+                    if ($_FILES['business_technical_images']['error'][$imgIndex] === UPLOAD_ERR_OK) {
                         $file_type = mime_content_type($tmpName);
                         $fileData = file_get_contents($tmpName);
 
-                        // Konversi gambar jika format tidak didukung
+                        // Validate and convert image if necessary
                         if (!in_array($file_type, $allowed_types)) {
                             $image = imagecreatefromstring($fileData);
                             ob_start();
@@ -93,26 +89,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             imagedestroy($image);
                         }
 
+                        // Prepare base64 image
                         $base64 = base64_encode($fileData);
-                        $deskripsi = htmlspecialchars($gambar_deskripsi[$index]);
-                        $mpdf->WriteHTML('<div style="text-align:center;"><img src="data:' . $file_type . ';base64,' . $base64 . '" style="width: 100%; max-width: 600px;"/><p>' . $deskripsi . '</p></div>');
+                        $deskripsi = htmlspecialchars($section['image_descriptions'][$imgIndex] ?? ""); // Use empty if not set
+                        $mpdf->WriteHTML('<div style="text-align:center;"><img src="data:' . $file_type . ';base64,' . $base64 . '" style="width: 100%; max-width: 200px;"/><p>' . $deskripsi . '</p></div>');
                     }
-                }
-            }
-
-            // Ruang Lingkup Pekerjaan
-            $mpdf->WriteHTML("<h3>Ruang Lingkup Pekerjaan</h3>");
-            if (is_array($ruang_lingkup_pekerjaan[$i])) {
-                foreach ($ruang_lingkup_pekerjaan[$i] as $index => $poin) {
-                    $mpdf->WriteHTML("<p>" . chr(97 + $index) . ". $poin</p>");
-                }
-            }
-
-            // Summary
-            $mpdf->WriteHTML("<h3>Summary</h3>");
-            if (is_array($summary[$i])) {
-                foreach ($summary[$i] as $index => $poin) {
-                    $mpdf->WriteHTML("<p>" . chr(97 + $index) . ". $poin</p>");
                 }
             }
         }
@@ -124,7 +105,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -143,71 +123,70 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <h2>TA</h2>
             <h6>Technical Assessment</h6>
             <form action="" method="post" class="mt-3" enctype="multipart/form-data">
-                <a name="" id="" class="btn btn-primary" href="index.php" role="button">Kembali</a>
+                <a class="btn btn-primary" href="index.php" role="button">Kembali</a>
+
                 <div class="form-group">
                     <label for="activityid">Activity ID</label>
                     <input type="text" class="form-control" id="activityid" name="activityid" required>
                 </div>
 
                 <div id="rab_container">
+                    <h3>RAB Sections</h3>
                     <div class="rab-section" id="rab_1">
                         <h4>RAB 1</h4>
-                        <div class="form-group" id="latar_belakang_group_1">
-                            <label for="latar_belakang_1">Latar Belakang</label>
-                            <div><input type="text" class="form-control mb-2" name="latar_belakang[0][]" required></div>
-                        </div>
-                        <button type="button" class="btn btn-primary"
-                            onclick="addInput('latar_belakang_group_1', 'latar_belakang[0][]')">Tambah Poin Latar
-                            Belakang</button>
-
-                        <div class="form-group" id="business_technical_group_1">
-                            <label for="business_technical_assessment_1">Business dan Technical Assessment</label>
-                            <div><input type="text" class="form-control mb-2" name="business_technical_assessment[0][]"
-                                    required></div>
-                        </div>
-                        <button type="button" class="btn btn-primary"
-                            onclick="addInput('business_technical_group_1', 'business_technical_assessment[0][]')">Tambah
-                            Poin Business dan Technical Assessment</button>
-
-                        <div class="form-group" id="gambar_group_1">
-                            <label for="business_technical_images_1">Upload Images</label>
-                            <div class="mb-2">
-                                <input type="file" class="form-control-file" name="business_technical_images[]"
-                                    multiple>
-                                <input type="text" class="form-control mt-2" name="gambar_deskripsi[]"
-                                    placeholder="Deskripsi Gambar">
-                            </div>
-                        </div>
-                        <button type="button" class="btn btn-primary" onclick="addImageInput('gambar_group_1')">Tambah
-                            Gambar</button>
-
-                        <div class="form-group" id="ruang_lingkup_group_1">
-                            <label for="ruang_lingkup_pekerjaan_1">Ruang Lingkup Pekerjaan</label>
-                            <div><input type="text" class="form-control mb-2" name="ruang_lingkup_pekerjaan[0][]"
-                                    required></div>
-                        </div>
-                        <button type="button" class="btn btn-primary"
-                            onclick="addInput('ruang_lingkup_group_1', 'ruang_lingkup_pekerjaan[0][]')">Tambah Poin
-                            Ruang Lingkup Pekerjaan</button>
-
-                        <div class="form-group" id="summary_group_1">
-                            <label for="summary_1">Summary</label>
-                            <div><input type="text" class="form-control mb-2" name="summary[0][]" required></div>
-                        </div>
-                        <button type="button" class="btn btn-primary"
-                            onclick="addInput('summary_group_1', 'summary[0][]')">Tambah Poin Summary</button>
+                        <button type="button" class="btn btn-success mb-2" onclick="addChapter(1)">Tambah Bab</button>
+                        <div class="chapter_container" id="chapter_container_1"></div>
                     </div>
                 </div>
 
-                <button type="button" class="btn btn-success mt-3" id="add_rab_btn">Tambah RAB</button>
+                <button type="button" class="btn btn-success mt-3 mb-4" id="add_rab_btn">Tambah RAB</button>
 
-                <button type="submit" class="btn btn-primary mt-3">Submit</button>
+                <button type="submit" class="btn btn-primary mt-3 mb-4">Submit</button>
             </form>
         </div>
     </div>
 
     <script>
         let rabCount = 1;
+
+        // Function to add a new RAB section
+        document.getElementById('add_rab_btn').addEventListener('click', function () {
+            rabCount++;
+            const rabContainer = document.getElementById('rab_container');
+            const rabSection = document.createElement('div');
+            rabSection.className = 'rab-section mt-4';
+            rabSection.id = 'rab_' + rabCount;
+            rabSection.innerHTML = `
+                <h4>RAB ${rabCount}</h4>
+                <button type="button" class="btn btn-success mb-2" onclick="addChapter(${rabCount})">Tambah Bab</button>
+                <div class="chapter_container" id="chapter_container_${rabCount}"></div>
+            `;
+            rabContainer.appendChild(rabSection);
+        });
+
+        // Function to add a new Chapter within a specific RAB section
+        function addChapter(rabIndex) {
+            const chapterContainer = document.getElementById(`chapter_container_${rabIndex}`);
+            const chapterCount = chapterContainer.children.length + 1; // Count existing chapters
+
+            const chapterSection = document.createElement('div');
+            chapterSection.className = 'chapter-section mt-3';
+            chapterSection.id = `chapter_${rabIndex}_${chapterCount}`;
+
+            chapterSection.innerHTML = `
+                <h5>Bab ${chapterCount}</h5>
+                <div class="form-group">
+                    <label for="chapter_name_${rabIndex}_${chapterCount}">Nama Bab</label>
+                    <input type="text" class="form-control mb-2" name="chapter_name[${rabIndex}][${chapterCount}]" required>
+                </div>
+                <button type="button" class="btn btn-primary" onclick="addInput('points_container_${rabIndex}_${chapterCount}', 'latar_belakang[${rabIndex}][${chapterCount}][]')">Tambah Poin</button>
+                <div class="points_container" id="points_container_${rabIndex}_${chapterCount}"></div>
+                <button type="button" class="btn btn-primary mt-2" onclick="addImageInput('image_container_${rabIndex}_${chapterCount}')">Tambah Gambar</button>
+                <div class="image_container" id="image_container_${rabIndex}_${chapterCount}"></div>
+            `;
+
+            chapterContainer.appendChild(chapterSection);
+        }
 
         function addInput(groupId, inputName) {
             const group = document.getElementById(groupId);
@@ -223,51 +202,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             div.innerHTML = '<input type="file" class="form-control-file" name="business_technical_images[]" multiple><input type="text" class="form-control mt-2" name="gambar_deskripsi[]" placeholder="Deskripsi Gambar">';
             group.appendChild(div);
         }
-
-        document.getElementById('add_rab_btn').addEventListener('click', function () {
-            rabCount++;
-            const rabContainer = document.getElementById('rab_container');
-            const rabSection = document.createElement('div');
-            rabSection.className = 'rab-section mt-4';
-            rabSection.id = 'rab_' + rabCount;
-            rabSection.innerHTML = `
-                <h4>RAB ${rabCount}</h4>
-                <div class="form-group" id="latar_belakang_group_${rabCount}">
-                    <label for="latar_belakang_${rabCount}">Latar Belakang</label>
-                    <div><input type="text" class="form-control mb-2" name="latar_belakang[${rabCount - 1}][]" required></div>
-                </div>
-                <button type="button" class="btn btn-primary" onclick="addInput('latar_belakang_group_${rabCount}', 'latar_belakang[${rabCount - 1}][]')">Tambah Poin Latar Belakang</button>
-
-                <div class="form-group" id="business_technical_group_${rabCount}">
-                    <label for="business_technical_assessment_${rabCount}">Business dan Technical Assessment</label>
-                    <div><input type="text" class="form-control mb-2" name="business_technical_assessment[${rabCount - 1}][]" required></div>
-                </div>
-                <button type="button" class="btn btn-primary" onclick="addInput('business_technical_group_${rabCount}', 'business_technical_assessment[${rabCount - 1}][]')">Tambah Poin Business dan Technical Assessment</button>
-
-                <div class="form-group" id="gambar_group_${rabCount}">
-                    <label for="business_technical_images_${rabCount}">Upload Images</label>
-                    <div class="mb-2">
-                        <input type="file" class="form-control-file" name="business_technical_images[]" multiple>
-                        <input type="text" class="form-control mt-2" name="gambar_deskripsi[]" placeholder="Deskripsi Gambar">
-                    </div>
-                </div>
-                <button type="button" class="btn btn-primary" onclick="addImageInput('gambar_group_${rabCount}')">Tambah Gambar</button>
-
-                <div class="form-group" id="ruang_lingkup_group_${rabCount}">
-                    <label for="ruang_lingkup_pekerjaan_${rabCount}">Ruang Lingkup Pekerjaan</label>
-                    <div><input type="text" class="form-control mb-2" name="ruang_lingkup_pekerjaan[${rabCount - 1}][]" required></div>
-                </div>
-                <button type="button" class="btn btn-primary" onclick="addInput('ruang_lingkup_group_${rabCount}', 'ruang_lingkup_pekerjaan[${rabCount - 1}][]')">Tambah Poin Ruang Lingkup Pekerjaan</button>
-
-                <div class="form-group" id="summary_group_${rabCount}">
-                    <label for="summary_${rabCount}">Summary</label>
-                    <div><input type="text" class="form-control mb-2" name="summary[${rabCount - 1}][]" required></div>
-                </div>
-                <button type="button" class="btn btn-primary" onclick="addInput('summary_group_${rabCount}', 'summary[${rabCount - 1}][]')">Tambah Poin Summary</button>
-            `;
-            rabContainer.appendChild(rabSection);
-        });
     </script>
 </body>
 
-</html>
+</html> 
