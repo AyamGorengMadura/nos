@@ -92,7 +92,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         // Prepare base64 image
                         $base64 = base64_encode($fileData);
                         $deskripsi = htmlspecialchars($section['image_descriptions'][$imgIndex] ?? ""); // Use empty if not set
-                        $mpdf->WriteHTML('<div style="text-align:center;"><img src="data:' . $file_type . ';base64,' . $base64 . '" style="width: 100%; max-width: 200px;"/><p>' . $deskripsi . '</p></div>');
+                        $mpdf->WriteHTML('<div style="text-align:center;"><img src="data:' . $file_type . ';base64,' . $base64 . '" style="width: 100%; max-height: `500px; max-width: 600px;"/><p>' . $deskripsi . '</p></div>');
                     }
                 }
             }
