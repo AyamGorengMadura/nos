@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // 
     if ($nojukb && $progname && $budget && $bholder && $coa) {
-        // Create an HTML string with the form data
+        
         $html = "
             <p style='font-size:20px;' align='center'>JUSTIFIKASI KEBUTUHAN BARANG / JASA / PROYEK</p>
             <hr>

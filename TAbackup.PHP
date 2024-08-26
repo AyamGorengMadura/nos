@@ -9,7 +9,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $activityid = $_POST['activityid'];
 
     // Ambil data db
-    $query = "SELECT judul, periode, tahun, coe FROM activities WHERE activityid = ?";
+    $query = "SELECT judul, periode, tahun  FROM activities WHERE activityid = ?";
     $stmt = $dbconn->prepare($query);
     $stmt->bind_param("s", $activityid);
     $stmt->execute();
@@ -17,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
-        $coe = $row['coe'];
+        // $coe = $row['coe'];
         $judul = $row['judul'];
         $periode = $row['periode'];
         $tahun = $row['tahun'];

@@ -73,7 +73,7 @@ $results = $dbconn->query("SELECT * FROM activities");
     <div class="outercontainer">
 
         <!-- sidebar start -->
-        <div class="col-2 row-12 card bg-dark text-light sidebar">
+        <div class="col-2 row-12 card bg-dark fixed-top text-light sidebar">
             <div class="mx-auto mt-4 col-10">
                 <p class="">Lorem, ipsum.</p>
                 <ul class="nav nav-tabs mb-3 text-decoration-none col-10">
@@ -146,10 +146,6 @@ $results = $dbconn->query("SELECT * FROM activities");
                         <input type="number" class="form-control" id="tahun" name="tahun" required>
                     </div>
                     <div class="mb-3">
-                        <label for="tahun" class="text-light form-label">COE</label>
-                        <textarea type="text" class="form-control" id="COE" name="COE" required></textarea>
-                    </div>
-                    <div class="mb-3">
                         <label for="activityid" class="text-light form-label">No Activity</label>
                         <input type="text" class="form-control" id="activityid" name="activityid" required>
                     </div>
@@ -165,38 +161,6 @@ $results = $dbconn->query("SELECT * FROM activities");
 </div>
 
 <!-- modal end -->
-
-
-        <!-- Display existing records -->
-        <div class="container mt-4">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Judul</th>
-                        <th>Periode</th>
-                        <th>Tahun</th>
-                        <th>Activity ID</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php while ($row = $results->fetch_assoc()): ?>
-                        <tr>
-                            <td><?php echo $row['id']; ?></td>
-                            <td><?php echo htmlspecialchars($row['judul']); ?></td>
-                            <td><?php echo htmlspecialchars($row['periode']); ?></td>
-                            <td><?php echo htmlspecialchars($row['tahun']); ?></td>
-                            <td><?php echo htmlspecialchars($row['activityid']); ?></td>
-                            <td>
-                                <a href="index.php?edit=<?php echo $row['id']; ?>" class="btn btn-warning">Edit</a>
-                                <a href="index.php?delete=<?php echo $row['id']; ?>" class="btn btn-danger">Delete</a>
-                            </td>
-                        </tr>
-                    <?php endwhile; ?>
-                </tbody>
-            </table>
-        </div>
 
         <script>
             document.querySelectorAll('.dropdown-toggle').forEach(function (dropdownToggle) {
