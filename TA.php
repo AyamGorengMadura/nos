@@ -171,7 +171,7 @@ $mpdf->AddPage(); // Add a new page
 
 foreach ($siteData as $data) {
     if (isset($data['Error'])) {
-        $mpdf->WriteHTML("<p style='font-size: 18px;'><strong>Site ID:</strong> " . htmlspecialchars($data['SiteID']) . " - " . htmlspecialchars($data['Error']) . "</p>");
+        $mpdf->WriteHTML("<p style='fon     t-size: 18px;'><strong>Site ID:</strong> " . htmlspecialchars($data['SiteID']) . " - " . htmlspecialchars($data['Error']) . "</p>");
     } else {
         // Adding content for each site
         $mpdf->WriteHTML("<h1> Latar Belakang </h1>");
@@ -196,7 +196,7 @@ foreach ($siteData as $data) {
             <tr><td>E.</td><td></td><td>Untuk mengamankan target Payload, Traffic, dan Revenue Telkomsel Tahun 2024, dan menambah coverage share dan pelanggan baru di Kab Pemalang</td></tr>
             </table>
         ");
-
+        
         // Business and technical images specific to this site
         foreach ($_FILES['business_technical_images']['tmp_name'] as $index => $tmpName) {
             if (is_uploaded_file($tmpName)) {
@@ -212,9 +212,11 @@ foreach ($siteData as $data) {
 
                 // Add the description to the PDF
                 $mpdf->WriteHTML("<h3>$description</h3>");
-                
+
             }
         }
+        
+        
 
         $mpdf->WriteHTML("<h1> Proyeksi Revenue </h1>");
         $mpdf->WriteHTML("<p>Proyeksi Revenue by SIFA = ". htmlspecialchars($data['prediksi_revenue_sifa']) ." dengan perhitungan jumlah populasi 8500 jiwa, sedangakan proyeksi revenue by Branch Surakarta dengan ARPU Rp. 60.000, Rev. BB=Rp. 51.000.000, Rev. Digital=Rp. 10.000.000 dan Rev. Voice=Rp. 5.000.000, total proyeksi revenue Combat = Rp. 52.500.000 </p>");

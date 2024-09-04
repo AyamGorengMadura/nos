@@ -101,6 +101,19 @@ $results = $dbconn->query("SELECT * FROM activities");
                             </div>
                         </div>
                     </li>
+                    <li class="">
+                        <div class="dropdown ms-2">
+                            <button class="mt-3 btn btn-outline-light dropdown-toggle fs-5" type="button"
+                                id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true"
+                                aria-expanded="false">TA</button>
+                            <div class="dropdown-menu rounded mt-3 bg-dark" aria-labelledby="dropdownMenuButton">
+                                <a class="dropdown-item fs-4 text-light rounded" id="" href="TAalter.php"><i
+                                        class="bi bi-send-fill"></i> TA </a>
+                                <a class="dropdown-item fs-4 text-light rounded" id="" href="TApdf.php"><i
+                                        class="bi bi-send-fill"></i> BUAT PDF</a>
+                            </div>
+                        </div>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link text-light mt-3 fs-4" href="TA.php"><i class="bi bi-send-fill"></i> TA </a>
                     </li>
