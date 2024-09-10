@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Generate PDF
 if (isset($_POST['generate_pdf'])) {
-    $mpdf = new \Mpdf\Mpdf();
+    $mpdf = new Mpdf();
 
     // Fetch program details
     $query = "SELECT * FROM program WHERE program_title = ?";
@@ -80,12 +80,15 @@ if (isset($_POST['generate_pdf'])) {
                 <tr><td>D.</td><td></td><td>Merupakan area blue ocean dimana tidak ada satupun operator seluler yang menjangkau Desa ' . $siteRow['desa'] . '.</td></tr>
                 <tr><td>E.</td><td></td><td>Untuk mengamankan target Payload, Traffic, dan Revenue Telkomsel Tahun 2024, dan menambah coverage share dan pelanggan baru di Kab ' . $siteRow['kabupaten'] . '.</td></tr>
             </table>';
+
+            
             
             // Add images
             $images = explode(',', $row['gambar']);
-            foreach ($images as $image) {
-                $html .= '<div style="text-align: center; margin: 5px; margin-top: 20px;"><img src="' . $image . '" style="width: 175px; height: auto;"></div>';
-            }
+            $i = 1 ;
+            foreach ($images as $image){
+                $html .= '<div style="text-align: center; margin: 5px; margin-top: 50px; "><img src="' . $image . '" style="width: 255px; height: auto;">
+                <p style="text-align: center; font-size: 20px;"><i>Gambar ' . $i++ . '<i></p></div>';            }
 
             $html .= '<p>Deskripsi: ' . $row['deskripsi_gambar'] . '</p>';
 
@@ -118,7 +121,16 @@ if (isset($_POST['generate_pdf'])) {
                 <tr><td>A.</td><td></td><td>Dismantle, Mobilisasi dan Instalasi Combat Arrow ini menggunakan budget Opex Q2 2024 RNOP Jateng DIY.</td></tr>
             </table>';
 
-            // Write the content for this site
+            // this should be signature area
+
+            $html .= '<h2>Signature:</h2>';
+            $html .= '<p>(Signed by Site Manager)</p>';
+
+            // this should be lampiran area
+
+  
+            
+
             $mpdf->WriteHTML($html);
             $mpdf->AddPage();
         }
@@ -163,7 +175,7 @@ if (isset($_POST['generate_pdf'])) {
         $writer->save('Program_' . $prog . '.xlsx');
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="Program_' . $prog . '.xlsx"');
-        $writer->save("php://output");
+        $writer->save("php://Technical Assesment");
         exit;
     }
 }

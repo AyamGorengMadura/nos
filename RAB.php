@@ -250,7 +250,7 @@ if (isset($_POST['generate_pdf'])) {
             input[type="number"] {
         width: 40px; /* atur lebar input */
         font-size: 10px; 
-        padding: 2px; /
+        padding: 2px;
         margin: 0; 
     }
 
