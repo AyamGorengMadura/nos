@@ -45,9 +45,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bind_param('sssssss', $activity, $departemen, $quartal, $siteID, $imagePathsString, $gambarDeskripsi, $programID);
         $stmt->execute();
     }
+
+    // Redirect after form submission to prevent form resubmission on page refresh
+    echo "<script>
+        window.onload = function() {
+            Swal.fire({
+                title: 'Success!',
+                text: 'Form has been submitted successfully.',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            });
+        };
+    </script>";
 }
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -57,6 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>TA</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> <!-- SweetAlert CDN -->
     <style>
         .site-section {
             border: 1px solid #ccc;
@@ -65,10 +77,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     </style>
     <script>
-        $(document).ready(function(){
-            $('#add-image').click(function(){
-                var newImageSection = $('.image-section:first').clone();
-                $('#image-wrapper').append(newImageSection);
+$(document).ready(function(){
+    $('#add-image').click(function(){
+        // Hitung jumlah image-section yang ada untuk menentukan indeks baru
+        var index = $('#image-wrapper .image-section').length;
+
+        // Buat div baru untuk section gambar
+        var newImageSection = `
+            <div class="image-section mt-3">
+                <label for="business_technical_images" class="form-label">Upload Images</label>
+                <input type="file" class="form-control-file" name="business_technical_images[` + index + `][]" accept="image/jpeg, image/png, image/gif" multiple>
+
+                <label for="gambar_deskripsi" class="form-label mt-2">Deskripsi Gambar</label>
+                <input type="text" class="form-control" name="gambar_deskripsi[` + index + `]" placeholder="Deskripsi Gambar" required>
+
+                <button type="button" class="btn btn-danger mt-2 remove-image">Hapus Gambar</button>
+            </div>
+        `;
+
+        // Tambahkan section gambar baru ke wrapper
+        $('#image-wrapper').append(newImageSection);
+    });
+
+            // SweetAlert confirmation on form submit
+            $('form').on('submit', function(e) {
+                e.preventDefault(); // Prevent form from submitting immediately
+                
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, submit it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        this.submit(); // Submit the form if confirmed
+                    }
+                });
             });
         });
     </script>
@@ -108,8 +155,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </select>
             </div>
 
-            <div >
-                <div class=" mb-3">
+            <div>
+                <div class="mb-3">
                     <label for="siteID" class="form-label">Masukkan Site ID</label>
                     <select class="form-control" name="site_id[]">
                         <?php foreach ($siteIDs as $id): ?>
@@ -122,7 +169,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <input type="file" class="form-control-file" name="business_technical_images[0][]" accept="image/jpeg, image/png, image/gif" multiple>
 
                         <label for="gambar_deskripsi" class="form-label mt-2">Deskripsi Gambar</label>
-                        <input type="text" class="form-control" name="gambar_deskripsi[]" placeholder="Deskripsi Gambar">
+                        <input type="text" class="form-control" name="gambar_deskripsi[]" placeholder="Deskripsi Gambar" required>
                     </div>
                 </div>
             </div>

@@ -87,10 +87,10 @@ if (isset($_POST['generate_pdf'])) {
             $images = explode(',', $row['gambar']);
             $i = 1 ;
             foreach ($images as $image){
-                $html .= '<div style="text-align: center; margin: 5px; margin-top: 50px; "><img src="' . $image . '" style="width: 255px; height: auto;">
+                $html .= '<div style="text-align: center; margin: 5px; margin-top: 50px; "><img src="' . $image . '" style="width: 290px; height: auto;">
                 <p style="text-align: center; font-size: 20px;"><i>Gambar ' . $i++ . '<i></p></div>';            }
-
-            $html .= '<p>Deskripsi: ' . $row['deskripsi_gambar'] . '</p>';
+                
+                $html .= '<p>Deskripsi: ' . $row['deskripsi_gambar'] . '</p>';
 
             $html .= '<h1>Proyeksi Revenue</h1>';
             $html .= '
