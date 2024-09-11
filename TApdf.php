@@ -83,14 +83,27 @@ if (isset($_POST['generate_pdf'])) {
 
             
             
-            // Add images
-            $images = explode(',', $row['gambar']);
-            $i = 1 ;
-            foreach ($images as $image){
-                $html .= '<div style="text-align: center; margin: 5px; margin-top: 50px; "><img src="' . $image . '" style="width: 290px; height: auto;">
-                <p style="text-align: center; font-size: 20px;"><i>Gambar ' . $i++ . '<i></p></div>';            }
+// Split the images and descriptions
+$images = explode(',', $row['gambar']);
+$descriptions = explode(',', $row['deskripsi_gambar']); // Split the descriptions
+$i = 1;
+
+// Loop through each image
+foreach ($images as $index => $image) {
+    // Get the corresponding description using the index
+    $description = isset($descriptions[$index]) ? $descriptions[$index] : 'No description';
+
+    // Display the image and its corresponding description
+    $html .= '<div style="text-align: center; margin: 5px; margin-top: 50px;">
+                <img src="' . $image . '" style="width: 290px; height: auto;">
+                <p style="text-align: center; font-size: 20px;">
+                    <i>Gambar ' . $i++ . ': ' . $description . '</i>
+                </p>
+              </div>';
+}
+
                 
-                $html .= '<p>Deskripsi: ' . $row['deskripsi_gambar'] . '</p>';
+                // $html .= '<p>Deskripsi: ' . $row['deskripsi_gambar'] . '</p>';
 
             $html .= '<h1>Proyeksi Revenue</h1>';
             $html .= '

@@ -27,9 +27,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     foreach ($_POST['site_id'] as $index => $siteID) {
-        $gambarDeskripsi = $_POST['gambar_deskripsi'][$index];
-        $images = $_FILES['business_technical_images']['name'][$index];
+        // Combine multiple descriptions into a string
+        $deskripsiArray = $_POST['gambar_deskripsi'][$index]; 
+        $gambarDeskripsi = implode(',', $deskripsiArray); // Concatenate descriptions
 
+        $images = $_FILES['business_technical_images']['name'][$index];
         $imagePaths = [];
         foreach ($images as $key => $imageName) {
             $targetFile = $uploadDir . basename($imageName);
@@ -40,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $imagePathsString = implode(',', $imagePaths);
 
-        // Simpan data ke database
+        // Save data to the database
         $stmt = $dbconn->prepare("INSERT INTO program (program, departemen, quartal, siteid, gambar, deskripsi_gambar, program_title) VALUES (?, ?, ?, ?, ?, ?, ?)");
         $stmt->bind_param('sssssss', $activity, $departemen, $quartal, $siteID, $imagePathsString, $gambarDeskripsi, $programID);
         $stmt->execute();
@@ -77,27 +79,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     </style>
     <script>
-$(document).ready(function(){
-    $('#add-image').click(function(){
-        // Hitung jumlah image-section yang ada untuk menentukan indeks baru
-        var index = $('#image-wrapper .image-section').length;
+        $(document).ready(function(){
+            $('#add-image').click(function(){
+                var index = $('#image-wrapper .image-section').length;
 
-        // Buat div baru untuk section gambar
-        var newImageSection = `
-            <div class="image-section mt-3">
-                <label for="business_technical_images" class="form-label">Upload Images</label>
-                <input type="file" class="form-control-file" name="business_technical_images[` + index + `][]" accept="image/jpeg, image/png, image/gif" multiple>
+                var newImageSection = `
+                    <div class="image-section mt-3">
+                        <label for="business_technical_images" class="form-label">Upload Images</label>
+                        <input type="file" class="form-control-file" name="business_technical_images[` + index + `][]" accept="image/jpeg, image/png, image/gif" multiple>
 
-                <label for="gambar_deskripsi" class="form-label mt-2">Deskripsi Gambar</label>
-                <input type="text" class="form-control" name="gambar_deskripsi[` + index + `]" placeholder="Deskripsi Gambar" required>
+                        <label for="gambar_deskripsi" class="form-label mt-2">Deskripsi Gambar</label>
+                        <input type="text" class="form-control" name="gambar_deskripsi[` + index + `][]" placeholder="Deskripsi Gambar" required>
+                    </div>
+                `;
 
-                <button type="button" class="btn btn-danger mt-2 remove-image">Hapus Gambar</button>
-            </div>
-        `;
-
-        // Tambahkan section gambar baru ke wrapper
-        $('#image-wrapper').append(newImageSection);
-    });
+                $('#image-wrapper').append(newImageSection);
+            });
 
             // SweetAlert confirmation on form submit
             $('form').on('submit', function(e) {
@@ -169,7 +166,7 @@ $(document).ready(function(){
                         <input type="file" class="form-control-file" name="business_technical_images[0][]" accept="image/jpeg, image/png, image/gif" multiple>
 
                         <label for="gambar_deskripsi" class="form-label mt-2">Deskripsi Gambar</label>
-                        <input type="text" class="form-control" name="gambar_deskripsi[]" placeholder="Deskripsi Gambar" required>
+                        <input type="text" class="form-control" name="gambar_deskripsi[0][]" placeholder="Deskripsi Gambar" required>
                     </div>
                 </div>
             </div>
