@@ -21,32 +21,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $quartal = $_POST['quartal'];
     $programID = strtoupper($quartal . '-' . $activity . '-' . $departemen);
 
-    $uploadDir = 'assets/upload';
+    $uploadDir = 'assets/upload/';
     if (!is_dir($uploadDir)) {
         mkdir($uploadDir, 0777, true);
     }
 
     foreach ($_POST['site_id'] as $index => $siteID) {
-        // Combine multiple descriptions into a string
-        $deskripsiArray = $_POST['gambar_deskripsi'][$index]; 
-        $gambarDeskripsi = implode(',', $deskripsiArray); // Concatenate descriptions
+    $images = $_FILES['business_technical_images']['name'][$index];  // Ambil semua gambar
+    $imageTmpNames = $_FILES['business_technical_images']['tmp_name'][$index];  // Ambil file tmp name
+    $imagePaths = [];
 
-        $images = $_FILES['business_technical_images']['name'][$index];
-        $imagePaths = [];
-        foreach ($images as $key => $imageName) {
-            $targetFile = $uploadDir . basename($imageName);
-            if (move_uploaded_file($_FILES['business_technical_images']['tmp_name'][$index][$key], $targetFile)) {
-                $imagePaths[] = $targetFile;
-            }
+    // Iterate through each uploaded image for the current site
+    foreach ($images as $key => $imageName) {
+        $targetFile = $uploadDir . basename($imageName);  // Tentukan path target
+
+        // Pindahkan file yang di-upload ke folder target
+        if (move_uploaded_file($imageTmpNames[$key], $targetFile)) {
+            $imagePaths[] = $targetFile;
+
+            // Ambil deskripsi gambar yang sesuai
+            $gambarDeskripsiArray = $_POST['gambar_deskripsi'][$index];
+            $gambarDeskripsi = $gambarDeskripsiArray[$key];  // Deskripsi sesuai gambar
+
+            // Simpan gambar dan deskripsi ke database
+            $stmt = $dbconn->prepare("INSERT INTO program (program, departemen, quartal, siteid, gambar, deskripsi_gambar, program_title) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param('sssssss', $activity, $departemen, $quartal, $siteID, $targetFile, $gambarDeskripsi, $programID);
+            $stmt->execute();
         }
-
-        $imagePathsString = implode(',', $imagePaths);
-
-        // Save data to the database
-        $stmt = $dbconn->prepare("INSERT INTO program (program, departemen, quartal, siteid, gambar, deskripsi_gambar, program_title) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param('sssssss', $activity, $departemen, $quartal, $siteID, $imagePathsString, $gambarDeskripsi, $programID);
-        $stmt->execute();
     }
+}
+
 
     // Redirect after form submission to prevent form resubmission on page refresh
     echo "<script>
@@ -61,6 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </script>";
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -77,22 +82,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             padding: 15px;
             margin-bottom: 15px;
         }
+        .table-form th, .table-form td {
+            padding: 8px;
+        }
     </style>
+    <script>
+    document.addEventListener('contextmenu', function(event) {
+        event.preventDefault();
+       
+    });
+    </script>
     <script>
         $(document).ready(function(){
             $('#add-image').click(function(){
                 var index = $('#image-wrapper .image-section').length;
 
                 var newImageSection = `
-                    <div class="image-section mt-3">
-                        <label for="business_technical_images" class="form-label">Upload Images</label>
-                        <input type="file" class="form-control-file" name="business_technical_images[` + index + `][]" accept="image/jpeg, image/png, image/gif" multiple>
-
-                        <label for="gambar_deskripsi" class="form-label mt-2">Deskripsi Gambar</label>
-                        <input type="text" class="form-control" name="gambar_deskripsi[` + index + `][]" placeholder="Deskripsi Gambar" required>
-                    </div>
+                    <tr class="image-section">
+                        <td><input type="file" class="form-control-file" name="business_technical_images[` + index + `][]" accept="image/jpeg, image/png, image/gif" multiple></td>
+                        <td><input type="text" class="form-control" name="gambar_deskripsi[` + index + `][]" placeholder="Deskripsi Gambar" required></td>
+                    </tr>
                 `;
-
                 $('#image-wrapper').append(newImageSection);
             });
 
@@ -120,61 +130,78 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <body>
     <div class="card card-transparent col-10 mx-auto mt-4 mb-4 text-start">
-        <center><h1>Technical Assessment</h1></center>
+        <center><h1 class="mb-3" >Technical Assessment</h1></center>
         <form action="" method="post" enctype="multipart/form-data">
+            <table class="table-form">
+                <tr>
+                    <td for="activity" class="form-label">Pilih Aktivitas</td>
+                    <td> : </td>
+                    <td>
+                        <select class="form-control" name="activity" id="activity">
+                            <option value="Relokasi Combat">Relokasi Combat</option>
+                            <option value="Program1">Program 1</option>
+                            <option value="Program2">Program 2</option>
+                            <option value="Program3">Program 3</option>
+                            <option value="Program4">Program 4</option>
+                        </select>
+                    </td>
+                </tr>
 
-            <div class="mb-3 mt-3">
-                <label for="activity" class="form-label">Pilih Aktivitas</label>
-                <select class="form-control" name="activity" id="activity">
-                    <option value="Relokasi Combat">Relokasi Combat</option>
-                    <option value="Program1">Program 1</option>
-                    <option value="Program2">Program 2</option>
-                    <option value="Program3">Program 3</option>
-                    <option value="Program4">Program 4</option>
-                </select>
-            </div>
+                <tr>
+                    <td for="quartal" class="form-label">Pilih Quartal</td>
+                    <td> : </td>
+                    <td>
+                        <select class="form-control" name="quartal" id="quartal">
+                            <option value="Q1">Q1</option>
+                            <option value="Q2">Q2</option>
+                            <option value="Q3">Q3</option>
+                            <option value="Q4">Q4</option>
+                        </select>
+                    </td>
+                </tr>
 
-            <div class="mb-3 mt-3">
-                <label for="quartal" class="form-label">Pilih Quartal</label>
-                <select class="form-control" name="quartal" id="quartal">
-                    <option value="Q1">Q1</option>
-                    <option value="Q2">Q2</option>
-                    <option value="Q3">Q3</option>
-                    <option value="Q4">Q4</option>
-                </select>
-            </div>
+                <tr>
+                    <td for="departemen" class="form-label">Pilih Departemen</td>
+                    <td> : </td>
+                    <td>
+                        <select class="form-control" name="departemen" id="departemen">
+                            <option value="NOP">NOP</option>
+                            <option value="NOS">NOS</option>
+                        </select>
+                    </td>
+                </tr>
 
-            <div class="mb-3 mt-3">
-                <label for="departemen" class="form-label">Pilih Departemen</label>
-                <select class="form-control" name="departemen" id="departemen">
-                    <option value="NOP">NOP</option>
-                    <option value="NOS">NOS</option>
-                </select>
-            </div>
+                <tr>
+                    <td for="siteID" class="form-label">Masukkan Site ID</td>
+                    <td> : </td>
+                    <td>
+                        <select class="form-control" name="site_id[]">
+                            <?php foreach ($siteIDs as $id): ?>
+                                <option value="<?= htmlspecialchars($id) ?>"><?= htmlspecialchars($id) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </td>
+                </tr>
+            </table>
 
-            <div>
-                <div class="mb-3">
-                    <label for="siteID" class="form-label">Masukkan Site ID</label>
-                    <select class="form-control" name="site_id[]">
-                        <?php foreach ($siteIDs as $id): ?>
-                            <option value="<?= htmlspecialchars($id) ?>"><?= htmlspecialchars($id) ?></option>
-                        <?php endforeach; ?>
-                    </select>
+            <table class="table-form mt-4">
+                <thead>
+                    <tr>
+                        <th>Upload Gambar</th>
+                        <th>Deskripsi Gambar</th>
+                    </tr>
+                </thead>
+                <tbody id="image-wrapper">
+                    <tr class="image-section">
+                        <td><input type="file" class="form-control-file" name="business_technical_images[0][]" accept="image/jpeg, image/png, image/gif" multiple></td>
+                        <td><input type="text" class="form-control" name="gambar_deskripsi[0][]" placeholder="Deskripsi Gambar" required></td>
+                    </tr>
+                </tbody>
+            </table>
+                
+            <button type="button" id="add-image" class="btn btn-secondary mb-3 mt-4">Tambah Gambar</button>
+            <button type="submit" class="btn btn-primary mt-4 mb-3">Submit</button>
 
-                    <div class="image-section" id="image-wrapper">
-                        <label for="business_technical_images" class="form-label mt-2">Upload Images</label>
-                        <input type="file" class="form-control-file" name="business_technical_images[0][]" accept="image/jpeg, image/png, image/gif" multiple>
-
-                        <label for="gambar_deskripsi" class="form-label mt-2">Deskripsi Gambar</label>
-                        <input type="text" class="form-control" name="gambar_deskripsi[0][]" placeholder="Deskripsi Gambar" required>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mb-2">
-                <button type="button" id="add-image" class="btn btn-secondary mt-4">Tambah Gambar</button>
-                <button type="submit" class="btn btn-primary mt-4">Submit</button>
-            </div>
         </form>
     </div>
 </body>
