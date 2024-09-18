@@ -12,4 +12,3 @@ if ($dbconn->connect_error) {
     die("Connection error: " . $dbconn->connect_error);
 }
 
-?>
