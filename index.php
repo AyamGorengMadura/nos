@@ -81,10 +81,10 @@ $results = $dbconn->query("SELECT * FROM activities");
                         <a class="nav-link text-light mt-2 fs-4" href="#"><i class="bi bi-inbox"></i> Dashboard </a>
                     </li>
 
-                    <li class="nav-item">
+                    <!-- <li class="nav-item">
                         <a class="nav-link text-light mt-3 mb-2 fs-5" data-bs-toggle="modal"
                             data-bs-target="#modaljudul"><i class="bi fs-4 bi-file-plus-fill"></i> Judul Activity </a>
-                    </li>
+                    </li> -->
 
                     <li class="">
                         <div class="dropdown ms-2">
@@ -114,15 +114,7 @@ $results = $dbconn->query("SELECT * FROM activities");
                             </div>
                         </div>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-light mt-3 fs-4" href="TA.php"><i class="bi bi-send-fill"></i> TA </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-light mt-3 fs-4" href="RAB.php"><i class="bi bi-send-fill"></i> RAB </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-light mt-3 fs-4" href="JTG-JUKB.php"><i class="bi bi-send-fill"></i> JUKB </a>
-                    </li>
+
 
                 </ul>
             </div>
