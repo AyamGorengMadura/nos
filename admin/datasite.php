@@ -57,6 +57,15 @@ $result = $dbconn->query($sql);
 <body>
 <div class="container mt-5">
     <h2 class="mb-4">Site Information</h2>
+    <a
+        name=""
+        id=""
+        class="btn btn-primary"
+        href="#"
+        role="button"
+        >Kembali</a
+    >
+    
     <div class="card w-100">
         <div class="card-header">
             <h5 class="card-title">Site Details</h5>
