@@ -1,5 +1,24 @@
 <?php
 include ('../koneksi.php');
+// Mulai sesi
+session_start();
+
+// Hapus semua variabel sesi
+$_SESSION = array();
+
+// Jika menggunakan cookie sesi, hapus cookie sesi
+if (ini_get("session.use_cookies")) {
+    $params = session_get_cookie_params();
+    setcookie(session_name(), '', time() - 42000,
+        $params["path"], $params["domain"],
+        $params["secure"], $params["httponly"]
+    );
+}
+
+// Hancurkan sesi
+session_destroy();
+
+
 
 // Handle Update for sitetb
 if (isset($_POST['update_site'])) {
@@ -65,14 +84,12 @@ $resultRab = $dbconn->query($sqlRab);
 <html lang="en">
 <head>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-
-
 </head>
 <body>
 <div class="container mt-5">
     <h2 class="mb-4">Site Information</h2>
-    <a href="../index.php" class="btn btn-danger" role="button">Logout</a>
     
+<a href="../index.php" class="btn btn-danger">Logout</a>
     <div class="card w-100 mt-3">
         <div class="card-header">
             <h5 class="card-title">Site Details</h5>

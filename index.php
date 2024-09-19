@@ -114,7 +114,10 @@ $results = $dbconn->query("SELECT * FROM activities");
                             </div>
                         </div>
                     </li>
-
+                      <!-- New login button -->
+                <li class="nav-item mt-3">
+                    <a class="btn btn-primary w-100 fs-5" href="admin/login.php"><i class="bi bi-box-arrow-in-right"></i> Login</a>
+                </li>
 
                 </ul>
             </div>
